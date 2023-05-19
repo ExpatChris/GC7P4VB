@@ -53,7 +53,7 @@
   </head>
   <body>
     <div id="wrapper">
-      <what3words-autosuggest id="autosuggest" api_key="ZAWHLUER">
+      <what3words-autosuggest id="autosuggest" api_key="ZAWHLUER" clip_to_circle="44.912733, -79.322867,4">
         <input type="text" />
       </what3words-autosuggest>
       <div id="map"></div>
@@ -61,11 +61,11 @@
 
     <script>
       mapboxgl.accessToken =
-        "YOUR-ACCESS-TOKEN";
+        "pk.eyJ1IjoiZXhwYXRjaHJpcyIsImEiOiJjbGh1djJwOG4wMzAyM3FvaTd3NzlnNDh0In0.in-I991QsnGtPRkxHEP0PA";
       const map = new mapboxgl.Map({
         container: "map",
         style: "mapbox://styles/mapbox/streets-v9",
-        center: [-0.195499, 51.52086],
+        center: [44.912733, -79.322867],
         zoom: 12
       });
 
