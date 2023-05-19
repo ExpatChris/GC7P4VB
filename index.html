@@ -1,31 +1,125 @@
 <!DOCTYPE html>
-<html>
-<title>expatchris.github.io</title>
-<head>
-<script
-  type="module"
-  src="https://cdn.what3words.com/javascript-components@4-latest/dist/what3words/what3words.esm.js"
-/>
-<script
-  nomodule
-  src="https://cdn.what3words.com/javascript-components@4-latest/dist/what3words/what3words.js?key=ZAWHLUER"
-/>
-</head>
-<body>
-<h1>GC7P4VB Sanity Check</h1>
-<div>
-<p> what3words autosuggest: </p>
-<form>
-<what3words-autosuggest
-  api_key="ZAWHLUER"
-  clip_to_circle="44.912733, -79.322867,4">
-  <input
-    autocomplete="off"
-    type="text"
-  />
-</what3words-autosuggest>
-</form>
-</p>
-</div>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+    <script
+      type="module"
+      src="https://cdn.what3words.com/javascript-components@4-latest/dist/what3words/what3words.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://cdn.what3words.com/javascript-components@4-latest/dist/what3words/what3words.js"
+    ></script>
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      html,
+      body,
+      #map {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #autosuggest {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+      }
+
+      #wrapper {
+        position: relative;
+        height: 100%;
+      }
+
+      .marker {
+        background-image: url("assets/what3words_logo.png");
+        background-size: cover;
+        width: 64px;
+        height: 64px;
+        cursor: pointer;
+      }
+    </style>
+    <title>Autosuggest Component (Mapbox)</title>
+  </head>
+  <body>
+    <div id="wrapper">
+      <what3words-autosuggest id="autosuggest" api_key="ZAWHLUER">
+        <input type="text" />
+      </what3words-autosuggest>
+      <div id="map"></div>
+    </div>
+
+    <script>
+      mapboxgl.accessToken =
+        "YOUR-ACCESS-TOKEN";
+      const map = new mapboxgl.Map({
+        container: "map",
+        style: "mapbox://styles/mapbox/streets-v9",
+        center: [-0.195499, 51.52086],
+        zoom: 12
+      });
+
+      const nav = new mapboxgl.NavigationControl();
+      map.addControl(nav, "bottom-right");
+
+      // save current map markers in a list (as global variable)
+      let markers = [];
+      let words;
+      document.querySelector("what3words-autosuggest").addEventListener(
+        "selected_suggestion",
+        ({
+          detail: {
+            suggestion: { words }
+          }
+        }) => {
+          // console.log(words);
+
+          what3words.api
+            .convertToCoordinatesGeoJson(words)
+            .then(function (response) {
+              // console.log("[convertToCoordinates]", response);
+
+              // loop the feature collection to get one feature at the time
+              response.features.forEach((marker) => {
+                // removing the marker anytime gets selected a new feature
+                markers.forEach((marker) => {
+                  marker.remove();
+                });
+                markers = [];
+
+                // create a HTML element for each feature
+                const el = document.createElement("div");
+                el.className = "marker";
+
+                // make a marker for each feature and add to the map
+                const mapMarker = new mapboxgl.Marker(el, {
+                  offset: [0, -64 / 2 + 3]
+                })
+                  .setLngLat(marker.geometry.coordinates)
+                  .addTo(map);
+
+                // save tmp marker into the markers list
+                markers.push(mapMarker);
+
+                /// center to the marker on the map
+                map.jumpTo({
+                  center: marker.geometry.coordinates,
+                  zoom: 19
+                });
+              });
+            });
+        }
+      );
+    </script>
+  </body>
 </html>
